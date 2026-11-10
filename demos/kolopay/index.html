@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>KoloPay — Achetez petit à petit</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Inter',sans-serif}
+:root{--p:#1B5E20;--pl:#4CAF50;--a:#FFA726;--bg:#F5F7F0;--c:#fff;--t:#1A1A1A;--g:#757575;--s:#2E7D32}
+body{background:var(--bg);max-width:430px;margin:0 auto;min-height:100vh;position:relative;overflow-x:hidden}
+.appbar{background:var(--p);color:#fff;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.appbar h1{font-size:20px;font-weight:800}
+.appbar span{font-size:11px;opacity:0.7}
+.search{padding:16px;position:relative}
+.search input{width:100%;padding:12px 16px 12px 44px;border:none;border-radius:12px;background:#f0f0f0;font-size:14px;outline:none}
+.search svg{position:absolute;left:30px;top:50%;transform:translateY(-50%);color:#999}
+.chips{display:flex;gap:8px;padding:0 16px 8px;overflow-x:auto}
+.chips::-webkit-scrollbar{display:none}
+.chip{padding:8px 16px;border-radius:20px;font-size:13px;font-weight:600;white-space:nowrap;background:#fff;border:1px solid #ddd;cursor:pointer}
+.chip.act{background:var(--p);color:#fff;border-color:var(--p)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:12px 16px 80px}
+.card{background:var(--c);border-radius:12px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.08);cursor:pointer}
+.card:active{transform:scale(0.97)}
+.card-img{height:120px;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:40px}
+.card-body{padding:10px 12px}
+.card-body h3{font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card-price{font-size:18px;font-weight:800;color:var(--p);margin-top:4px}
+.card-sub{font-size:11px;color:var(--s);font-weight:600}
+.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:#fff;display:flex;justify-content:space-around;padding:8px 0 12px;box-shadow:0 -2px 10px rgba(0,0,0,0.05);z-index:100}
+.nav-item{text-align:center;cursor:pointer;padding:6px 12px;border-radius:8px}
+.nav-item svg{width:24px;height:24px;margin:0 auto 2px;display:block}
+.nav-item span{font-size:11px;color:var(--g);font-weight:500}
+.nav-item.act svg,.nav-item.act span{color:var(--p);font-weight:700}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;justify-content:center;align-items:flex-end}
+.overlay.show{display:flex}
+.sheet{background:#fff;width:100%;max-width:430px;max-height:92vh;border-radius:20px 20px 0 0;overflow-y:auto;animation:su 0.3s ease}
+@keyframes su{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.sheet-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid #eee;position:sticky;top:0;background:#fff;z-index:10}
+.sheet-header h2{font-size:16px;font-weight:700}
+.close-btn{width:32px;height:32px;border-radius:50%;background:#f0f0f0;border:none;font-size:18px;color:var(--g);cursor:pointer}
+.sheet-body{padding:20px}
+.p-img{width:100%;height:200px;background:var(--bg);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:64px;margin-bottom:16px}
+.p-title{font-size:22px;font-weight:800}
+.p-price{font-size:28px;font-weight:800;color:var(--p);margin-top:6px}
+.p-cdf{font-size:13px;color:var(--g)}
+.p-desc{font-size:14px;color:var(--g);line-height:1.5;margin-top:10px}
+.p-shop{font-size:12px;color:#888;margin-top:8px}
+.calc-box{background:rgba(27,94,32,0.05);border:1px solid rgba(27,94,32,0.2);border-radius:12px;padding:16px;margin-top:20px}
+.calc-box h3{font-size:16px;font-weight:700;color:var(--p);margin-bottom:14px}
+.calc-label{font-size:13px;font-weight:600;margin-bottom:8px}
+.freq-chips{display:flex;gap:8px;margin-bottom:16px}
+.freq-chip{padding:8px 14px;border-radius:20px;border:1px solid #ddd;font-size:13px;font-weight:600;cursor:pointer;background:#fff}
+.freq-chip.act{background:var(--p);color:#fff;border-color:var(--p)}
+.recap{margin-top:12px;padding-top:12px;border-top:1px solid rgba(27,94,32,0.15)}
+.recap-row{display:flex;justify-content:space-between;padding:4px 0;font-size:14px}
+.recap-row .green{color:var(--p);font-weight:800;font-size:18px}
+.cta-btn{width:100%;padding:14px;background:var(--p);color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:600;margin-top:20px;cursor:pointer}
+.cta-btn:active{background:#0D3D12}
+.info-box{background:#FFF3E0;border-radius:10px;padding:12px;margin-top:16px}
+.info-box span{font-size:12px;color:#E65100}
+.pay-screen{display:none;position:fixed;inset:0;background:var(--bg);z-index:300;max-width:430px;margin:0 auto;overflow-y:auto}
+.pay-screen.show{display:block}
+.pay-appbar{background:var(--p);color:#fff;padding:16px 20px;display:flex;align-items:center;gap:12px;position:sticky;top:0}
+.pay-appbar button{background:none;border:none;color:#fff;font-size:20px;cursor:pointer}
+.pay-appbar h2{font-size:16px;font-weight:700}
+.prog-card{background:#fff;border-radius:16px;padding:16px;margin:16px;box-shadow:0 2px 8px rgba(0,0,0,0.06)}
+.prog-bar{height:10px;background:#e0e0e0;border-radius:5px;overflow:hidden;margin:10px 0}
+.prog-fill{height:100%;background:var(--p);border-radius:5px;transition:width 0.5s}
+.pay-section{background:#fff;border-radius:12px;padding:16px;margin:16px}
+.pay-section label{font-size:14px;font-weight:600;display:block;margin-bottom:8px}
+.amount-input{width:100%;padding:12px;border:1px solid #ddd;border-radius:12px;font-size:16px;outline:none}
+.amount-input:focus{border-color:var(--p);border-width:2px}
+.momo-item{display:flex;align-items:center;gap:12px;padding:12px;border:1px solid #ddd;border-radius:12px;margin-bottom:8px;cursor:pointer}
+.momo-item.sel{border-color:var(--p);background:rgba(27,94,32,0.03)}
+.momo-icon{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff}
+.pay-btn{width:calc(100% - 32px);padding:14px;background:var(--p);color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:600;margin:20px 16px;cursor:pointer}
+.success-screen{display:none;position:fixed;inset:0;background:#fff;z-index:400;max-width:430px;margin:0 auto;text-align:center;padding:40px 24px}
+.success-screen.show{display:flex;flex-direction:column;justify-content:center;align-items:center}
+.s-icon{width:80px;height:80px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:40px;margin-bottom:16px}
+.s-icon.complete{background:rgba(255,167,38,0.15)}
+.s-icon.partial{background:rgba(46,125,50,0.1)}
+.success-screen h2{font-size:22px;font-weight:800;margin-bottom:8px}
+.success-screen p{font-size:14px;color:var(--g);line-height:1.5;max-width:280px}
+.success-screen button{width:100%;max-width:300px;padding:14px;background:var(--p);color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:600;margin-top:24px;cursor:pointer}
+.alt-screen{display:none}.alt-screen.show{display:block}
+.plan-card{background:#fff;border-radius:12px;padding:16px;margin:0 16px 12px;box-shadow:0 1px 4px rgba(0,0,0,0.06)}
+.plan-header{display:flex;justify-content:space-between;align-items:start}
+.plan-header h3{font-size:15px;font-weight:700}
+.plan-badge{padding:4px 10px;border-radius:12px;font-size:12px;font-weight:700}
+.plan-badge.active{background:rgba(27,94,32,0.1);color:var(--p)}
+.plan-badge.complete{background:rgba(46,125,50,0.1);color:var(--s)}
+.plan-prog{height:8px;background:#e0e0e0;border-radius:4px;overflow:hidden;margin:10px 0}
+.plan-prog-fill{height:100%;background:var(--p);border-radius:4px}
+.plan-stats{display:flex;justify-content:space-between;font-size:13px;font-weight:600}
+.plan-stats .grey{color:var(--g);font-weight:400}
+.empty-state{text-align:center;padding:60px 32px}
+.notif-item{display:flex;gap:12px;padding:14px 16px;border-bottom:1px solid #f0f0f0}
+.notif-icon{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.notif-icon.pay{background:rgba(27,94,32,0.1)}
+.notif-icon.complete{background:rgba(255,167,38,0.15)}
+.notif-content h4{font-size:14px;font-weight:600}
+.notif-content p{font-size:12px;color:var(--g);margin-top:2px}
+.notif-content time{font-size:11px;color:#bbb}
+.footer{text-align:center;padding:16px;font-size:12px;color:var(--g)}
+</style>
+</head>
+<body>
+<div class="appbar"><h1>KoloPay</h1><span>Achetez petit à petit</span></div>
+<div class="search">
+<svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+<input type="text" id="search" placeholder="Rechercher un article..." oninput="filterSearch()">
+</div>
+<div class="chips" id="chips"></div>
+<div class="grid" id="grid"></div>
+<div class="footer">Inspire by YuuStore</div>
+<div class="bottom-nav">
+<div class="nav-item act" data-nav="market" onclick="nav('market')"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l2-5h14l2 5M3 9v11a2 2 0 002 2h14a2 2 0 002-2V9M3 9h18"/></svg><span>Boutique</span></div>
+<div class="nav-item" data-nav="plans" onclick="nav('plans')"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2v20M5 2v20M19 2v20M2 5h20M2 12h20M2 19h20"/></svg><span>Mes Plans</span></div>
+<div class="nav-item" data-nav="notifs" onclick="nav('notifs')"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 01-3.4 0"/></svg><span>Alertes</span></div>
+<div class="nav-item" data-nav="profile" onclick="nav('profile')"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a8.38 8.38 0 0113 0"/></svg><span>Profil</span></div>
+</div>
+<div class="overlay" id="overlay"><div class="sheet"><div class="sheet-header"><h2>Détails du produit</h2><button class="close-btn" onclick="closeDetail()">✕</button></div><div class="sheet-body" id="detailBody"></div></div></div>
+<div class="pay-screen" id="payScreen"><div class="pay-appbar"><button onclick="closePay()">←</button><h2>Versement</h2></div><div id="payBody"></div></div>
+<div class="success-screen" id="successScreen"><div class="s-icon" id="sIcon"></div><h2 id="sTitle"></h2><p id="sMsg"></p><button onclick="closeAll()">Retour à l'accueil</button></div>
+<div class="alt-screen" id="plansScreen"><div class="appbar" style="position:static"><h1>Mes Plans</h1></div><div id="plansBody" style="padding-top:16px"></div></div>
+<div class="alt-screen" id="notifsScreen"><div class="appbar" style="position:static"><h1>Notifications</h1></div><div id="notifsBody"></div></div>
+<div class="alt-screen" id="profileScreen"><div class="appbar" style="position:static"><h1>Profil</h1></div><div style="padding:20px;text-align:center"><div style="width:80px;height:80px;border-radius:50%;background:rgba(27,94,32,0.1);display:flex;align-items:center;justify-content:center;margin:0 auto 12px"><svg width="40" height="40" fill="none" stroke="#1B5E20" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a8.38 8.38 0 0113 0"/></svg></div><h3 style="font-size:20px;font-weight:bold">KoloPay</h3><div style="margin-top:32px;background:#fff;border-radius:12px"><div style="padding:14px 16px;border-bottom:1px solid #f0f0f0">ℹ️ À propos — Version 1.0.0</div><div style="padding:14px 16px;border-bottom:1px solid #f0f0f0">🛟 Aide & Support</div><div style="padding:14px 16px">🔒 Confidentialité</div></div><div style="margin:16px;background:#fff;border-radius:12px"><div style="padding:14px 16px;border-bottom:1px solid #f0f0f0">🏪 Devenir commerçant</div><div style="padding:14px 16px">📞 Contact — +243 977 555 768</div></div><div class="footer">Inspire by YuuStore</div></div></div>
+<script src="app.js"></script>
+</body>
+</html>

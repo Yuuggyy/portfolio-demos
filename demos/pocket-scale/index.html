@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#0a0a0a" />
+  <title>Pocket Scale</title>
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body {
+      font-family: -apple-system, 'SF Pro Display', system-ui, sans-serif;
+      background: #0a0a0a;
+      color: #fff;
+      overflow: hidden;
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    #app { width: 100vw; height: 100vh; height: 100dvh; display: flex; flex-direction: column; }
+
+    /* Header */
+    .header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 16px 20px; padding-top: max(16px, env(safe-area-inset-top));
+      border-bottom: 1px solid #222;
+    }
+    .app-name { font-size: 1.1rem; font-weight: 700; letter-spacing: 0.5px; }
+    .header-btns { display: flex; gap: 10px; }
+    .header-btn {
+      background: #222; border: none; color: #888;
+      font-size: 0.8rem; padding: 8px 14px; border-radius: 10px; cursor: pointer;
+    }
+
+    /* Home */
+    .home { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 30px; text-align: center; }
+    .logo-circle {
+      width: 80px; height: 80px; border-radius: 20px;
+      background: linear-gradient(135deg, #00ff88, #0088ff);
+      display: flex; align-items: center; justify-content: center; margin-bottom: 24px;
+    }
+    .logo-text { font-size: 1.8rem; font-weight: 800; color: #000; }
+    .home-title { font-size: 1.8rem; font-weight: 700; margin-bottom: 8px; }
+    .home-sub { color: #888; font-size: 0.9rem; margin-bottom: 24px; line-height: 1.4; }
+    .home-warning {
+      background: #1a1a1a; border: 1px solid #333; border-radius: 12px;
+      padding: 14px 18px; font-size: 0.8rem; color: #999; margin-bottom: 32px; max-width: 320px; line-height: 1.5;
+    }
+    .home-start {
+      background: #00ff88; color: #000; border: none;
+      padding: 16px 48px; border-radius: 16px; font-size: 1rem; font-weight: 700; cursor: pointer;
+    }
+    .home-footer { margin-top: 32px; font-size: 0.7rem; color: #444; }
+
+    /* Display */
+    .display-area { text-align: center; padding: 30px 20px 10px; }
+    .weight-number {
+      font-size: 3.5rem; font-weight: 200; font-variant-numeric: tabular-nums;
+      transition: color 0.2s; letter-spacing: -1px;
+    }
+    .weight-sub { font-size: 0.85rem; color: #555; margin-top: 4px; }
+
+    /* Gauge */
+    .gauge-container { width: 100%; height: 8px; background: #222; margin: 10px 0; border-radius: 4px; overflow: hidden; }
+    .gauge-bar { height: 100%; transition: width 0.15s ease-out; border-radius: 4px; }
+
+    /* Raw data */
+    .raw-data { display: flex; justify-content: space-around; padding: 8px 20px; font-size: 0.75rem; }
+    .raw-item { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+    .raw-label { color: #555; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.5px; }
+    .raw-value { color: #aaa; font-weight: 600; font-variant-numeric: tabular-nums; }
+
+    /* Touch surface */
+    .touch-surface {
+      flex: 1; margin: 12px 20px; border-radius: 20px;
+      display: flex; align-items: center; justify-content: center; position: relative;
+      transition: border 0.2s, background 0.2s; min-height: 180px;
+    }
+    .touch-placeholder { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+    .touch-circle { width: 60px; height: 60px; border-radius: 50%; border: 2px dashed #444; }
+    .touch-text { color: #444; font-size: 0.85rem; }
+    .touch-indicator {
+      position: absolute; border-radius: 50%; border: 2px solid rgba(0,255,136,0.4);
+      transform: translate(-50%, -50%); pointer-events: none; transition: width 0.1s, height 0.1s;
+    }
+
+    /* Actions */
+    .action-row { display: flex; gap: 12px; padding: 0 20px 8px; }
+    .action-btn {
+      flex: 1; padding: 14px; border: none; border-radius: 14px;
+      font-size: 0.9rem; font-weight: 600; cursor: pointer;
+    }
+    .tare-btn { background: #1a1a2e; color: #aaa; }
+    .save-btn { background: #0d3320; color: #00ff88; }
+    .action-btn:disabled { opacity: 0.3; }
+
+    /* Accuracy note */
+    .accuracy-note {
+      text-align: center; font-size: 0.7rem; color: #444;
+      padding: 4px 20px; padding-bottom: max(12px, env(safe-area-inset-bottom));
+    }
+
+    /* Calibrate */
+    .calibrate { flex: 1; padding: 0 20px 20px; overflow: auto; }
+    .cal-header { display: flex; align-items: center; gap: 12px; padding: 12px 0; }
+    .back-btn { background: #222; border: none; color: #aaa; padding: 8px 16px; border-radius: 10px; cursor: pointer; font-size: 0.85rem; }
+    .cal-title { font-size: 1.2rem; font-weight: 600; }
+    .cal-info { color: #888; font-size: 0.8rem; line-height: 1.6; margin-bottom: 16px; background: #111; padding: 14px; border-radius: 12px; }
+    .weight-selector { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+    .weight-option { border: none; padding: 10px 18px; border-radius: 12px; font-size: 0.85rem; font-weight: 600; cursor: pointer; background: #222; color: #fff; }
+    .weight-option.active { background: #00ff88; color: #000; }
+    .cal-touch-area {
+      height: 160px; border-radius: 16px; background: #111;
+      display: flex; align-items: center; justify-content: center; margin-bottom: 12px;
+      border: 2px solid #333;
+    }
+    .cal-touch-area.active { border: 2px solid #00ff88; }
+    .record-btn {
+      width: 100%; padding: 14px; border: none; border-radius: 14px;
+      background: #00ff88; color: #000; font-size: 0.9rem; font-weight: 700; cursor: pointer; margin-bottom: 20px;
+    }
+    .record-btn:disabled { opacity: 0.3; }
+    .points-title { font-size: 0.9rem; color: #888; margin-bottom: 8px; }
+    .no-points { color: #555; font-size: 0.85rem; }
+    .point-row {
+      display: flex; justify-content: space-between; padding: 10px 14px;
+      background: #111; border-radius: 10px; margin-bottom: 6px; font-size: 0.85rem;
+    }
+    .cal-result {
+      background: #0d3320; border: 1px solid rgba(0,255,136,0.2); border-radius: 12px;
+      padding: 14px; text-align: center; color: #00ff88; font-size: 0.85rem; line-height: 1.6;
+    }
+
+    /* History */
+    .history { flex: 1; padding: 0 20px 20px; overflow: auto; }
+    .empty-history { text-align: center; color: #555; padding: 60px 20px; font-size: 0.9rem; }
+    .history-list { display: flex; flex-direction: column; gap: 8px; }
+    .history-item { background: #111; border-radius: 14px; padding: 16px 18px; }
+    .history-weight { font-size: 1.4rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+    .history-time { font-size: 0.75rem; color: #666; margin-top: 4px; }
+    .clear-btn {
+      width: 100%; margin-top: 16px; padding: 12px; background: #1a0a0a;
+      border: 1px solid rgba(255,68,68,0.2); color: #ff6666; border-radius: 12px; font-size: 0.85rem; cursor: pointer;
+    }
+
+    /* Unsupported */
+    .unsupported { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; text-align: center; }
+    .unsupp-icon { font-size: 3rem; color: #ff4444; margin-bottom: 16px; }
+    .unsupp-title { font-size: 1.5rem; margin-bottom: 12px; }
+    .unsupp-text { color: #888; font-size: 0.9rem; line-height: 1.5; max-width: 300px; margin-bottom: 12px; }
+    .unsupp-hint { color: #555; font-size: 0.8rem; }
+
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+  <script>
+    (function() {
+      'use strict';
+
+      // ─── State ───
+      var state = {
+        mode: 'home',
+        touchData: null,
+        rawRadius: 0,
+        tareOffset: 0,
+        calibrationFactor: null,
+        calibrationPoints: [],
+        calibrationTarget: null,
+        history: [],
+        supported: true,
+      };
+
+      var CALIBRATION_WEIGHTS = [
+        { label: '5 g', value: 5 },
+        { label: '10 g', value: 10 },
+        { label: '50 g', value: 50 },
+        { label: '100 g', value: 100 },
+        { label: '200 g', value: 200 },
+      ];
+      var MAX_GRAMS = 500;
+
+      // ─── Helper ───
+      function formatWeight(g) {
+        if (g < 1) return Math.round(g * 1000) + ' mg';
+        if (g < 10) return g.toFixed(2) + ' g';
+        return g.toFixed(1) + ' g';
+      }
+
+      function calculateWeight() {
+        if (!state.touchData || !state.calibrationFactor) return 0;
+        var baseRadius = state.calibrationPoints.length > 0 ? state.calibrationPoints[0].radius : 0;
+        var deltaRadius = Math.max(0, state.touchData.radius - baseRadius);
+        var weight = deltaRadius * state.calibrationFactor - state.tareOffset;
+        return Math.max(0, Math.min(weight, MAX_GRAMS));
+      }
+
+      // ─── Touch Handlers ───
+      function handleTouchStart(e) {
+        e.preventDefault();
+        if (e.touches.length === 0) return;
+        var t = e.touches[0];
+        var force = (t.force !== undefined) ? t.force : 0;
+        var radius = (t.radiusX !== undefined) ? Math.max(t.radiusX, t.radiusY || 0) : 0;
+        state.rawRadius = radius;
+        state.touchData = { force: force, radius: radius, x: t.clientX, y: t.clientY };
+        render();
+      }
+
+      function handleTouchMove(e) {
+        e.preventDefault();
+        if (e.touches.length === 0) return;
+        var t = e.touches[0];
+        var force = (t.force !== undefined) ? t.force : 0;
+        var radius = (t.radiusX !== undefined) ? Math.max(t.radiusX, t.radiusY || 0) : 0;
+        state.rawRadius = radius;
+        state.touchData = { force: force, radius: radius, x: t.clientX, y: t.clientY };
+        render();
+      }
+
+      function handleTouchEnd(e) {
+        e.preventDefault();
+        state.touchData = null;
+        state.rawRadius = 0;
+        render();
+      }
+
+      // ─── Actions ───
+      function doTare() {
+        if (!state.touchData) return;
+        var baseRadius = state.calibrationPoints.length > 0 ? state.calibrationPoints[0].radius : 0;
+        var delta = Math.max(0, state.touchData.radius - baseRadius);
+        if (state.calibrationFactor) {
+          state.tareOffset = delta * state.calibrationFactor;
+        }
+        render();
+      }
+
+      function saveToHistory() {
+        var w = calculateWeight();
+        if (w > 0) {
+          var now = new Date();
+          state.history.unshift({
+            weight: w,
+            time: now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
+            date: now.toLocaleDateString('fr-FR'),
+          });
+          if (state.history.length > 50) state.history.pop();
+        }
+        render();
+      }
+
+      function recordCalibrationPoint() {
+        if (!state.touchData || !state.calibrationTarget) return;
+        var point = { radius: state.touchData.radius, grams: state.calibrationTarget };
+        state.calibrationPoints.push(point);
+        var allPoints = state.calibrationPoints.slice();
+        if (allPoints.length >= 2) {
+          allPoints.sort(function(a, b) { return a.radius - b.radius; });
+          var p1 = allPoints[0];
+          var p2 = allPoints[allPoints.length - 1];
+          var dr = p2.radius - p1.radius;
+          if (dr > 0) {
+            state.calibrationFactor = (p2.grams - p1.grams) / dr;
+          }
+        }
+        render();
+      }
+
+      // ─── Render ───
+      var app = document.getElementById('app');
+
+      function el(tag, className, attrs, children) {
+        var node = document.createElement(tag);
+        if (className) node.className = className;
+        if (attrs) {
+          for (var key in attrs) {
+            if (key === 'style') {
+              for (var sk in attrs.style) node.style[sk] = attrs.style[sk];
+            } else if (key === 'text') {
+              node.textContent = attrs[key];
+            } else if (key === 'onClick') {
+              node.onclick = attrs[key];
+            } else if (key === 'onTouchStart') {
+              node.ontouchstart = attrs[key];
+            } else if (key === 'onTouchMove') {
+              node.ontouchmove = attrs[key];
+            } else if (key === 'onTouchEnd') {
+              node.ontouchend = attrs[key];
+            } else if (key === 'disabled') {
+              if (attrs[key]) node.disabled = true;
+            } else {
+              node.setAttribute(key, attrs[key]);
+            }
+          }
+        }
+        if (children) {
+          if (typeof children === 'string') {
+            node.textContent = children;
+          } else if (Array.isArray(children)) {
+            children.forEach(function(c) {
+              if (c) node.appendChild(c);
+            });
+          }
+        }
+        return node;
+      }
+
+      function renderHome() {
+        return el('div', 'home', null, [
+          el('div', 'logo-circle', null, [
+            el('span', 'logo-text', { text: 'PS' })
+          ]),
+          el('h1', 'home-title', { text: 'Pocket Scale' }),
+          el('p', 'home-sub', { text: 'Balance de poche estimee via la surface de contact tactile' }),
+          el('div', 'home-warning', { text: 'Precision: +/- 15-30 g selon l\'appareil. Calibrez avant la premiere utilisation.' }),
+          el('button', 'home-start', { onClick: function() { state.mode = 'weigh'; render(); } }, 'Commencer'),
+          el('div', 'home-footer', { text: 'iPhone 11+ (sans 3D Touch) - methode radius de contact' }),
+        ]);
+      }
+
+      function renderHeader() {
+        return el('div', 'header', null, [
+          el('span', 'app-name', { text: 'Pocket Scale' }),
+          el('div', 'header-btns', null, [
+            el('button', 'header-btn', {
+              onClick: function() { state.mode = 'calibrate'; render(); },
+              style: { opacity: state.calibrationFactor ? 1 : 0.4 }
+            }, 'Calibrer'),
+            el('button', 'header-btn', {
+              onClick: function() { state.mode = 'history'; render(); }
+            }, 'Historique'),
+          ]),
+        ]);
+      }
+
+      function renderWeigh() {
+        var w = calculateWeight();
+        var radiusDisplay = state.touchData ? state.touchData.radius.toFixed(2) : '0.00';
+        var forceDisplay = state.touchData ? Math.round(state.touchData.force * 100) : 0;
+        var gaugePercent = Math.min(100, (w / MAX_GRAMS) * 100);
+
+        var touchSurface = el('div', 'touch-surface', {
+          onTouchStart: handleTouchStart,
+          onTouchMove: handleTouchMove,
+          onTouchEnd: handleTouchEnd,
+          style: {
+            border: state.touchData ? '2px solid #00ff88' : '2px solid #333',
+            background: state.touchData
+              ? 'radial-gradient(circle at center, rgba(0,255,136,0.15), rgba(0,0,0,0.8))'
+              : '#111'
+          }
+        });
+
+        if (state.touchData) {
+          var indicator = el('div', 'touch-indicator', {
+            style: {
+              left: state.touchData.x + 'px',
+              top: state.touchData.y + 'px',
+              width: Math.max(40, state.touchData.radius * 2) + 'px',
+              height: Math.max(40, state.touchData.radius * 2) + 'px',
+            }
+          });
+          touchSurface.appendChild(indicator);
+        } else {
+          touchSurface.appendChild(el('div', 'touch-placeholder', null, [
+            el('div', 'touch-circle'),
+            el('span', 'touch-text', { text: 'Touchez ici' })
+          ]));
+        }
+
+        return el('div', null, null, [
+          el('div', 'display-area', null, [
+            el('div', 'weight-number', {
+              text: formatWeight(w),
+              style: { color: state.touchData ? '#00ff88' : '#333' }
+            }),
+            el('div', 'weight-sub', {
+              text: state.touchData ? 'Mesure en cours...' : 'Posez un objet sur l\'ecran'
+            }),
+          ]),
+          el('div', 'gauge-container', null, [
+            el('div', 'gauge-bar', {
+              style: {
+                width: gaugePercent + '%',
+                background: w > 0
+                  ? 'linear-gradient(90deg, #00ff88, #ffcc00 ' + Math.min(100, gaugePercent * 2) + '%, #ff4444)'
+                  : '#222'
+              }
+            })
+          ]),
+          el('div', 'raw-data', null, [
+            el('div', 'raw-item', null, [
+              el('span', 'raw-label', { text: 'Contact' }),
+              el('span', 'raw-value', { text: radiusDisplay + ' px' }),
+            ]),
+            el('div', 'raw-item', null, [
+              el('span', 'raw-label', { text: 'Force' }),
+              el('span', 'raw-value', { text: forceDisplay + '%' }),
+            ]),
+            el('div', 'raw-item', null, [
+              el('span', 'raw-label', { text: 'Calibration' }),
+              el('span', 'raw-value', {
+                text: state.calibrationFactor ? state.calibrationFactor.toFixed(1) + ' g/px' : 'Requise'
+              }),
+            ]),
+          ]),
+          touchSurface,
+          el('div', 'action-row', null, [
+            el('button', 'action-btn tare-btn', {
+              onClick: doTare,
+              disabled: !state.touchData
+            }, 'Tare'),
+            el('button', 'action-btn save-btn', {
+              onClick: saveToHistory,
+              disabled: w <= 0
+            }, 'Enregistrer'),
+          ]),
+          el('div', 'accuracy-note', { text: 'Precision estimee: +/- 15-30 g (methode par contact tactile)' }),
+        ]);
+      }
+
+      function renderCalibrate() {
+        var touchArea = el('div', 'cal-touch-area' + (state.touchData ? ' active' : ''), {
+          onTouchStart: handleTouchStart,
+          onTouchMove: handleTouchMove,
+          onTouchEnd: handleTouchEnd,
+        });
+
+        if (state.touchData) {
+          touchArea.appendChild(el('div', null, { style: { textAlign: 'center' } }, [
+            el('div', null, {
+              style: { fontSize: '2rem', fontWeight: '700', color: '#00ff88' },
+              text: state.rawRadius.toFixed(2) + ' px'
+            }),
+            el('div', null, {
+              style: { fontSize: '0.85rem', color: '#888', marginTop: '8px' },
+              text: 'Maintenez et enregistrez'
+            }),
+          ]));
+        } else {
+          touchArea.appendChild(el('div', null, {
+            style: { color: '#555' },
+            text: 'Posez le poids et maintenez'
+          }));
+        }
+
+        var weightOptions = CALIBRATION_WEIGHTS.map(function(w) {
+          return el('button', 'weight-option' + (state.calibrationTarget === w.value ? ' active' : ''), {
+            onClick: function() { state.calibrationTarget = w.value; render(); }
+          }, w.label);
+        });
+
+        var pointsList = el('div', null, null, [el('h3', 'points-title', { text: 'Points enregistres' })]);
+        if (state.calibrationPoints.length === 0) {
+          pointsList.appendChild(el('p', 'no-points', { text: 'Aucun point encore' }));
+        } else {
+          state.calibrationPoints.forEach(function(p) {
+            pointsList.appendChild(el('div', 'point-row', null, [
+              el('span', null, { text: p.grams + ' g' }),
+              el('span', null, { style: { color: '#888' }, text: p.radius.toFixed(2) + ' px' }),
+            ]));
+          });
+        }
+
+        return el('div', 'calibrate', null, [
+          el('div', 'cal-header', null, [
+            el('button', 'back-btn', {
+              onClick: function() { state.mode = 'weigh'; render(); }
+            }, 'Retour'),
+            el('h2', 'cal-title', { text: 'Calibrage' }),
+          ]),
+          el('p', 'cal-info', { text: '1. Choisissez un poids de reference\n2. Posez-le sur l\'ecran\n3. Appuyez sur Enregistrer\n4. Repetez avec un autre poids pour plus de precision' }),
+          el('div', 'weight-selector', null, weightOptions),
+          touchArea,
+          el('button', 'record-btn', {
+            onClick: recordCalibrationPoint,
+            disabled: !state.touchData || !state.calibrationTarget
+          }, 'Enregistrer ce point'),
+          pointsList,
+          state.calibrationFactor
+            ? el('div', 'cal-result', {
+                text: 'Calibration terminee: ' + state.calibrationFactor.toFixed(2) + ' g/px\nVous pouvez retourner a la balance.'
+              })
+            : null,
+        ]);
+      }
+
+      function renderHistory() {
+        var list = el('div', 'history-list');
+        if (state.history.length === 0) {
+          return el('div', 'history', null, [
+            el('div', 'cal-header', null, [
+              el('button', 'back-btn', {
+                onClick: function() { state.mode = 'weigh'; render(); }
+              }, 'Retour'),
+              el('h2', 'cal-title', { text: 'Historique' }),
+            ]),
+            el('div', 'empty-history', { text: 'Aucune mesure enregistree' }),
+          ]);
+        }
+
+        state.history.forEach(function(h) {
+          list.appendChild(el('div', 'history-item', null, [
+            el('div', null, null, [
+              el('div', 'history-weight', { text: formatWeight(h.weight) }),
+              el('div', 'history-time', { text: h.date + ' - ' + h.time }),
+            ]),
+          ]));
+        });
+
+        return el('div', 'history', null, [
+          el('div', 'cal-header', null, [
+            el('button', 'back-btn', {
+              onClick: function() { state.mode = 'weigh'; render(); }
+            }, 'Retour'),
+            el('h2', 'cal-title', { text: 'Historique' }),
+          ]),
+          list,
+          el('button', 'clear-btn', {
+            onClick: function() { state.history = []; render(); }
+          }, 'Effacer l\'historique'),
+        ]);
+      }
+
+      function renderUnsupported() {
+        return el('div', 'unsupported', null, [
+          el('div', 'unsupp-icon', { text: '[!]' }),
+          el('h2', 'unsupp-title', { text: 'Non supporte' }),
+          el('p', 'unsupp-text', {
+            text: 'Votre appareil ne expose pas les donnees de contact tactile. Cette application necessite un navigateur compatible avec Touch API radius.'
+          }),
+          el('p', 'unsupp-hint', { text: 'Essayez avec Safari sur iOS. Les resultats peuvent varier selon le modele.' }),
+        ]);
+      }
+
+      function render() {
+        app.innerHTML = '';
+        if (!state.supported) {
+          app.appendChild(renderUnsupported());
+          return;
+        }
+
+        if (state.mode === 'home') {
+          app.appendChild(renderHome());
+          return;
+        }
+
+        // Header + content
+        var container = el('div', null, { style: { display: 'flex', flexDirection: 'column', height: '100%' } });
+        container.appendChild(renderHeader());
+
+        if (state.mode === 'weigh') {
+          container.appendChild(renderWeigh());
+        } else if (state.mode === 'calibrate') {
+          container.appendChild(renderCalibrate());
+        } else if (state.mode === 'history') {
+          container.appendChild(renderHistory());
+        }
+        app.appendChild(container);
+      }
+
+      // ─── Check support on first touch ───
+      function checkSupport(e) {
+        if (e.touches && e.touches.length > 0) {
+          var t = e.touches[0];
+          if (t.force === undefined && t.radiusX === undefined) {
+            state.supported = false;
+            render();
+          }
+        }
+        window.removeEventListener('touchstart', checkSupport);
+      }
+      window.addEventListener('touchstart', checkSupport, { passive: true });
+
+      // ─── Init ───
+      render();
+    })();
+  </script>
+</body>
+</html>

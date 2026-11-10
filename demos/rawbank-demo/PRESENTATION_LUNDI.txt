@@ -1,0 +1,183 @@
+SCRIPT DE PRESENTATION RAWBANK - LUNDI 10 AOUT 2026
+===================================================
+
+DUREE ESTIMEE: 15-20 minutes
+
+===================================================
+OUVERTURE (2 min)
+===================================================
+
+"Bonjour à tous. Aujourd'hui je vais vous présenter la super-application RawBank, une plateforme qui combine l'intelligence artificielle et les services bancaires pour transformer la façon dont RawBank accompagne ses clients en RDC.
+
+L'objectif: permettre à tout entrepreneur ou PME de soumettre un projet, d'être guidé par 5 agents IA spécialisés, et de recevoir une évaluation automatisée en temps réel."
+
+===================================================
+ETAPE 1: PRESENTATION DE L'INTERFACE (3 min)
+===================================================
+
+[Ouvrir l'app sur téléphone ou navigateur]
+Lien: https://yuuggyy.github.io/rawbank-demo/
+
+Points à montrer:
+- Écran de connexion (mode démo: n'importe quel email/mot de passe)
+- Connexion en tant que client (joseph.kabasele@gmail.com / Demo1234!)
+- Dashboard: solde IllicoCash, transactions récentes, accès rapide
+- Design Material 3, phone-first, couleurs RawBank (vert #00a651)
+
+"Comme vous pouvez le voir, l'interface est mobile-first avec un design Material 3 moderne. Le client accède immédiatement à son solde, ses transactions et tous les services."
+
+===================================================
+ETAPE 2: CHAT AI - LE COEUR DE L'APP (5 min)
+===================================================
+
+[Aller dans l'onglet "Assistant"]
+
+Démonstration en 3 questions:
+
+Question 1 (Routing):
+"Je voudrais financer un projet de transformation agroalimentaire dans le Kasaï"
+→ Le Routeur IA oriente automatiquement vers le bon agent
+→ L'agent RSE prend le relais et évalue l'impact
+
+Question 2 (RSE/ESG):
+"Quel est l'impact environnemental de mon projet de centrale solaire?"
+→ Réponse détaillée avec analyse de l'impact
+→ Score attribué (0-100)
+
+Question 3 (Comptabilité):
+"Quel taux d'intérêt pour un prêt de 75 000 USD sur 5 ans?"
+→ L'Agent Comptabilité répond avec les calculs
+
+Points clés à souligner:
+- 5 agents IA: Routeur, RSE, Conformité, Commercial, Comptabilité
+- Routing automatique par mots-clés
+- Réponses en 2-3 secondes (API Groq)
+- Scoring automatique des projets (0-100)
+- Historique de conversation persistant
+
+"Chaque agent est spécialisé dans un domaine. Le Routeur analyse la question et oriente automatiquement vers l'agent le plus pertinent. Le client reçoit une réponse experte en quelques secondes."
+
+===================================================
+ETAPE 3: SOUMISSION DE PROJET (4 min)
+===================================================
+
+[Onglet Projets → bouton +]
+
+Montrer le formulaire en 4 étapes:
+
+Étape 1: Informations générales
+- Nom, description, secteur, classification RSE/ESG
+
+Étape 2: Financement
+- Type: Prêt, Prêt avec intérêt, Partenariat, RSE/ESG
+- Montant, taux d'intérêt (si applicable), revenus projetés
+
+Étape 3: Détails
+- Promoteur, expérience, marché cible, concurrence
+
+Étape 4: Récapitulatif et soumission
+
+À souligner:
+- Classification RSE/ESG priorisée (objectif de RawBank)
+- 4 types de financement incluant prêt avec intérêt et partenariat
+- Champs spécifiques selon le type (taux, ROI, partage des bénéfices)
+- Soumission connectée à Supabase en temps réel
+
+"Le formulaire de soumission est structuré en 4 étapes. La classification RSE/ESG est mise en avant car c'est une priorité pour RawBank. Le client choisit son type de financement parmi 4 options."
+
+===================================================
+ETAPE 4: ADMIN DASHBOARD (3 min)
+===================================================
+
+[Déconnexion → se reconnecter en admin]
+Email: admin@rawbank.cd
+
+Montrer:
+- Statistiques en temps réel (utilisateurs, projets, financement, transactions)
+- 4 projets dans le système avec statuts (soumis, en révision, approuvé)
+- Boutons Approuver/Rejeter fonctionnels
+- Messages IA: 8 conversations stockées
+- 5 agents IA actifs
+
+Données de démo visibles:
+- 4 utilisateurs enregistrés
+- 4 projets (270 000$ de financement total)
+- 8 transactions IllicoCash
+- 3 sessions de chat, 8 messages
+- 4 documents KYC
+
+"Le dashboard administrateur donne une vue d'ensemble en temps réel. L'admin peut voir tous les projets soumis et les approuver ou rejeter directement. Les statistiques se mettent à jour automatiquement."
+
+===================================================
+ETAPE 5: ARCHITECTURE TECHNIQUE (2 min)
+===================================================
+
+Stack technique:
+- Frontend: Flutter (mobile + web), Material 3
+- Backend: Base44 (fonctions serverless)
+- Base de données: Supabase (PostgreSQL, RLS)
+- IA: Groq API (LLM, réponses < 3s)
+- 9 tables: user_profiles, projects, transactions, chat, KYC, notifications, exchange_rates, admin_users
+
+Architecture multi-agents:
+- Routeur IA: orientation et synthèse
+- Agent RSE: impact social et environnemental
+- Agent Conformité: réglementaire et juridique (BCC, RCCM)
+- Agent Commercial: viabilité marché et concurrence
+- Agent Comptabilité: analyse financière, DSCR, ROI
+
+===================================================
+ETAPE 6: ROADMAP (1 min)
+===================================================
+
+Phase 1 (actuelle): Démo fonctionnelle
+- Chat AI avec 5 agents
+- Soumission de projets
+- Admin dashboard
+- Données Supabase en temps réel
+
+Phase 2: Production
+- Authentification réelle (Supabase Auth)
+- Upload de plans d'affaires (documents)
+- Base de connaissances RAG (documents RawBank)
+- Notifications push
+- Intégration IllicoCash réelle
+
+Phase 3: Scale
+- KYC avec OCR
+- Scoring de crédit automatisé
+- Intégration BCC (Banque Centrale du Congo)
+- API ouverte pour partenaires
+
+===================================================
+CONCLUSION (1 min)
+===================================================
+
+"En résumé, cette application donne à RawBank un outil concret pour:
+1. Accompagner les clients avec 5 agents IA spécialisés
+2. Recevoir et évaluer des projets en temps réel
+3. Prioriser l'approche RSE/ESG dans le financement
+4. Donner aux administrateurs une vision claire et actionnable
+
+L'application est fonctionnelle aujourd'hui, connectée à Supabase, et prête pour les tests utilisateurs.
+
+Je vous remercie et je suis ouvert à vos questions."
+
+===================================================
+QUESTIONS ANTICIPÉES
+===================================================
+
+Q: Les agents IA utilisent quelle technologie?
+R: LLM via l'API Groq (Llama), avec un système de routing par mots-clés. Chaque agent a un prompt système spécialisé dans son domaine. Réponses en moins de 3 secondes.
+
+Q: Les données sont stockées où?
+R: Supabase (PostgreSQL hébergé). 9 tables avec Row-Level Security. L'admin accède à toutes les données, les clients ne voient que leurs propres données.
+
+Q: Est-ce que ça marche hors ligne?
+R: L'app Flutter fonctionne en mode déconnecté pour l'affichage. Le chat IA nécessite une connexion internet. Les données se synchronisent au retour de la connexion.
+
+Q: Comment ça passe à la production?
+R: Il faut: activer l'auth Supabase réelle, intégrer l'API IllicoCash, configurer les notifications push, et enrichir la base de connaissances RAG avec les documents RawBank (politiques de financement, grille tarifaire, etc.)
+
+Q: Coût de fonctionnement?
+R: Base44 (backend + IA): crédits selon l'usage. Supabase: gratuit jusqu'à 500MB et 50 000 utilisateurs. Groq: gratuit en phase beta. Coût total estimé: minimal en phase de lancement.
